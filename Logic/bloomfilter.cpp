@@ -2,26 +2,41 @@
 #include <iostream>
 #include <cmath>
 #include <functional>
+#include <string>
 
 class bloomFilter {
     public:
 
         // Insertion function into the bloom filter
         void insert(const std::string& element){
-            
-            // Insertion requires hashing 
-            
+
+            // Most important loop: runs the input through each hash function and sets that value in bits array to one
+            for (int i = 0; i < numHashFunctions; i++) {
+                std::size_t index = hashN(element, i);
+                bitArray[index] = true;
+            }
+            numElements++;
 
         }
 
         // Look up functions (possible to give false positives)
-        bool lookup(const std::string& element) const;
+        bool lookup(const std::string& element) const {
+            for (int i = 0; i < numHashFunctions; i++) {
+                std::size_t index = hashN(element, i);
+                
+                // If any bit set to zero
+                if (!bitArray[index]) { 
+                    return false;        
+                }
+            }
+            return true;  // All bits were 1, probably in the set
+        }
 
         // Constructor for only size known
         bloomFilter(std::size_t numBits, std::size_t numHashFunctions){
             
             // Resizing the bool array for the provided number of bits
-            bitArray.resize(numBits);
+            bitArray.resize(numBits, false);
 
             // Setting num hash functions
             setNumHashFunctions(numHashFunctions);
@@ -29,7 +44,7 @@ class bloomFilter {
  
         // Returns the probability that a false positive will occur (formula from geeks for geeks)
         double probFalsePos() const{
-            return std::pow(1 - std::pow(1 - 1/(bitArray.size()), numHashFunctions*numElements), numHashFunctions)
+            return std::pow(1 - std::pow(1 - 1.0/(bitArray.size()), numHashFunctions*numElements), numHashFunctions);                                                                                                      ^ add semicolon
         }
 
         // Getter for number elements, no setter since we calculate as we add
@@ -48,10 +63,8 @@ class bloomFilter {
 
         // clears the entire filter along with all the elements
         void clear(){
-            // For every element in the array pop the back one for 0(n) time
-            for(std::size_t i{}; i < numElements; i++){
-                bitArray.pop_back();
-            }
+            std::fill(bitArray.begin(), bitArray.end(), false);
+            numElements = 0;  // Also reset counter
         }
 
         // Base inbuilt hashing function

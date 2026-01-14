@@ -31,9 +31,7 @@ class bloomFilter {
 
         // Hash function 1
         unsigned long long hash2(auto input) const;
-
     
-        
     private:
         // Counts the number of elements currently in the filter
         std::size_t numElements{};
@@ -43,10 +41,4 @@ class bloomFilter {
 
         // The number of hashfunctions used in the filter
         std::size_t numHashFunctions{};
-
-
-
-
-
-
 };
