@@ -26,11 +26,10 @@ class bloomFilter {
         // clears the entire filter along with all the elements
         void clear();
 
-        // Hash function 1
-        unsigned long long hash1(auto input) const;
-
-        // Hash function 1
-        unsigned long long hash2(auto input) const;
+        // Hash functions
+        unsigned long long hash1(const std::string& input) const;
+        unsigned long long hash2(const std::string& input) const;
+        unsigned long long hashN(const std::string& input, int n) const;
     
     private:
         // Counts the number of elements currently in the filter

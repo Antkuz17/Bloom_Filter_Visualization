@@ -1,6 +1,6 @@
     #include <pybind11/pybind11.h>
     #include <pybind11/stl.h>  // For automatic conversion of std::vector, std::string
-    #include "bloomFilter.h"   // Your bloom filter header
+    #include "header.hpp"   // Your bloom filter header
 
     namespace py = pybind11;
 
