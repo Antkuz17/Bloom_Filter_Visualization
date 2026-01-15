@@ -11,7 +11,10 @@ TEXT = '#F2F5F3'         # Gray 1 - text
 GREEN = '#0FBF3E'        # GitHub green
 GREEN_LIGHT = '#5FED83'  # Green 3
 
+
+# Global Bloom Filter variable used to allow for garbage collection
 bf = None
+square_ids = []
 
 def create_filter():
     global bf
@@ -19,14 +22,17 @@ def create_filter():
     num_hashes = int(hash_var.get())
     bf = bloom.BloomFilter(num_bits, num_hashes)
     print(f"Created filter: {num_bits} bits, {num_hashes} hashes")
+    
     draw_grid()
+    update_stats()
 
 def draw_grid():
+    global square_ids
     canvas.delete('all')
-    
+    square_ids = []
     num_bits = int(bits_var.get())
     
-    # 2:1 ratio (twice as wide as tall)
+
     cols = int((num_bits * 2) ** 0.5)
     rows = (num_bits + cols - 1) // cols
     
@@ -51,15 +57,53 @@ def draw_grid():
         y1 = offset_y + row * (square_size + gap)
         x2 = x1 + square_size
         y2 = y1 + square_size
-        canvas.create_rectangle(x1, y1, x2, y2, fill='#232925', outline='')
+        rect_id = canvas.create_rectangle(x1, y1, x2, y2, fill='#232925', outline='')
+        square_ids.append(rect_id)
 
 def insert_word():
+    word = word_entry.get()
+
+    # Check if filter exists
+    if bf is None:
+        print("Create filter first")
+        return
+    
+    # Get bit positions for the word
+    bit_positions = bf.get_bit_positions(word)
+    
+    # Insert the word
+    bf.insert(word)
+    
+    # Light up those bits
+    for bit_pos in bit_positions:
+        canvas.itemconfig(square_ids[bit_pos], fill=GREEN)
+
+    update_stats()
+    result_label.config(text="")
+    word_entry.delete(0, tk.END)
+
+def update_stats():
+    if bf is None:
+        return
+    
+    num_elements = bf.get_num_elements()
+    fp_rate = bf.prob_false_pos() * 100  # Convert to percentage
+    
+    elements_label.config(text=f"Elements: {num_elements}")
+    fp_label.config(text=f"False Positive Rate: {fp_rate:.4f}%")
+
+def check_word():
     word = word_entry.get()
     if bf is None:
         print("Create filter first")
         return
-    bf.insert(word)
-    print(f"Inserted: {word}")
+    
+    result = bf.lookup(word)
+    if result:
+        result_label.config(text=f"'{word}' might be in set", fg=GREEN)
+    else:
+        result_label.config(text=f"'{word}' not in set", fg='#f85149')
+    
     word_entry.delete(0, tk.END)
 
 
@@ -82,6 +126,7 @@ bits_label.grid(row=0, column=0, padx=10, sticky='w')
 bits_var = tk.StringVar(value="1000")
 bits_dropdown = ttk.Combobox(setup_frame, textvariable=bits_var, values=["100", "500", "1000", "5000", "10000"],width=10, state='readonly')
 bits_dropdown.grid(row=0, column=1, padx=10)
+bits_dropdown.bind('<<ComboboxSelected>>', lambda e: root.focus())
 
 # Number of hash functions label and entry
 hash_label = tk.Label(setup_frame, text="Number of hash functions:", bg=BG_PANEL, fg=TEXT, font=('Times New Roman', 10))
@@ -89,6 +134,8 @@ hash_label.grid(row=0, column=2, padx=10, sticky='w')
 hash_var = tk.StringVar(value="3")
 hash_dropdown = ttk.Combobox(setup_frame, textvariable=hash_var,values=["2", "3", "4", "5"],width=5, state='readonly')
 hash_dropdown.grid(row=0, column=3, padx=10)
+bits_dropdown.bind('<<ComboboxSelected>>', lambda e: root.focus())
+
 
 
 create_btn = tk.Button(setup_frame, text="Create Filter", 
@@ -98,6 +145,7 @@ create_btn = tk.Button(setup_frame, text="Create Filter",
                        padx=15, pady=5, bd=0)
 create_btn.grid(row=0, column=4, padx=20)
 
+
 canvas = tk.Canvas(root, width=700, height=400, bg=BG_DARK, highlightthickness=0)
 canvas.pack(side='bottom', pady=20, fill='both', expand=True)
 
@@ -105,6 +153,18 @@ canvas.pack(side='bottom', pady=20, fill='both', expand=True)
 # Word input section
 input_frame = tk.Frame(root, bg=BG_DARK, padx=20, pady=15)
 input_frame.pack(fill='x')
+
+# Stats section
+stats_frame = tk.Frame(root, bg=BG_PANEL, padx=20, pady=15)
+stats_frame.pack(fill='x')
+
+fp_label = tk.Label(stats_frame, text="False Positive Rate: --", 
+                    bg=BG_PANEL, fg=TEXT, font=('Times New Roman', 10))
+fp_label.grid(row=0, column=1, padx=20)
+
+elements_label = tk.Label(stats_frame, text="Elements: 0", 
+                          bg=BG_PANEL, fg=TEXT, font=('Times New Roman', 10))
+elements_label.grid(row=0, column=2, padx=20)
 
 word_label = tk.Label(input_frame, text="Input a Word:", bg=BG_DARK, fg=TEXT)
 word_label.grid(row=0, column=0, padx=10)
@@ -116,6 +176,13 @@ word_entry.grid(row=0, column=1, padx=10)
 insert_btn = tk.Button(input_frame, text="Insert", command=insert_word,
                        bg=GREEN, fg=BG_DARK, font=('Times New Roman', 10))
 insert_btn.grid(row=0, column=2, padx=10)
+
+check_btn = tk.Button(input_frame, text="Check", command=check_word,
+                      bg='#5FED83', fg=BG_DARK, font=('Arial', 10))
+check_btn.grid(row=0, column=3, padx=10)
+
+result_label = tk.Label(input_frame, text="", bg=BG_DARK, fg=TEXT, font=('Arial', 10))
+result_label.grid(row=0, column=4, padx=20)
 
 
 root.mainloop()
