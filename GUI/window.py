@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 sys.path.append('../Logic') # Adjust path as needed
-import bloom
+import bloom 
 
 # GitHub colors
 BG_DARK = '#101411'      # Gray 6 - darkest background
@@ -59,6 +59,7 @@ def draw_grid():
         y2 = y1 + square_size
         rect_id = canvas.create_rectangle(x1, y1, x2, y2, fill='#232925', outline='')
         square_ids.append(rect_id)
+
 
 def insert_word():
     word = word_entry.get()

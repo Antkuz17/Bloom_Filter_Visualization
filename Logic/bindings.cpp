@@ -16,5 +16,6 @@
             .def("clear", &bloomFilter::clear)
             .def("get_num_elements", &bloomFilter::getNumElements)
             .def("get_num_hash_functions", &bloomFilter::getNumHashFunctions)
-            .def("prob_false_pos", &bloomFilter::probFalsePos);
+            .def("prob_false_pos", &bloomFilter::probFalsePos)
+            .def("get_bit_positions", &bloomFilter::getBitPositions);
     }

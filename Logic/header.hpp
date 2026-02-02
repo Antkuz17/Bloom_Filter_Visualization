@@ -30,6 +30,8 @@ class bloomFilter {
         unsigned long long hash1(const std::string& input) const;
         unsigned long long hash2(const std::string& input) const;
         unsigned long long hashN(const std::string& input, int n) const;
+
+        std::vector<std::size_t> getBitPositions(const std::string& element) const;
     
     private:
         // Counts the number of elements currently in the filter
@@ -40,4 +42,5 @@ class bloomFilter {
 
         // The number of hashfunctions used in the filter
         std::size_t numHashFunctions{};
+
 };

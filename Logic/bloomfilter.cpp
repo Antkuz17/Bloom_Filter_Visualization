@@ -85,3 +85,17 @@
         unsigned long long bloomFilter::hashN(const std::string& input, int n) const {
             return (hash1(input) + n * hash2(input)) % bitArray.size();
         }
+
+
+        // Get the bit positions that would be set for an element (for visualization)
+        std::vector<std::size_t> bloomFilter::getBitPositions(const std::string& element) const {
+            std::vector<std::size_t> positions;
+            positions.reserve(numHashFunctions);
+            
+            for (int i = 0; i < numHashFunctions; i++) {
+                std::size_t index = hashN(element, i);
+                positions.push_back(index);
+            }
+            
+            return positions;
+        }
