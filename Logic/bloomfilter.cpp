@@ -3,6 +3,7 @@
 #include <cmath>
 #include <functional>
 #include <string>
+#include <algorithm>
 #include "header.hpp"
 
 
@@ -49,6 +50,14 @@
         // Getter for number elements, no setter since we calculate as we add
         std::size_t bloomFilter::getNumElements() const{
             return numElements;
+        }
+
+        std::size_t bloomFilter::getNumBits() const {
+            return bitArray.size();
+        }
+
+        std::size_t bloomFilter::getNumSetBits() const {
+            return std::count(bitArray.begin(), bitArray.end(), true);
         }
 
         // Getters and setters for num hash functions

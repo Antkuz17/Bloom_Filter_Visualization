@@ -25,6 +25,12 @@ class bloomFilter {
         // Getter for number elements, no setter since we calculate as we add
         std::size_t getNumElements() const;
 
+        // Getter for the total number of bits in the filter
+        std::size_t getNumBits() const;
+
+        // Returns the number of bits currently set to true
+        std::size_t getNumSetBits() const;
+
         // Getters and setters for num hash functions
         void setNumHashFunctions(std::size_t numHashFunctions);
         std::size_t getNumHashFunctions() const;
